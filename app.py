@@ -5,10 +5,14 @@ from PIL import Image
 from sklearn.cluster import KMeans
 
 
+def clear_pixels_choice():
+    st.session_state.pixels_choice = None
+
 
 uploaded_file = st.file_uploader(
-    "Choose an image...", type=["jpg", "jpeg", "png", "webp"],
+    "Choose an image...", type=["jpg", "jpeg", "png", "webp"], on_change=clear_pixels_choice
 )
+
 
 if uploaded_file is not None:
     k = st.slider("Select number of clusters (k)", min_value=2, max_value=21, value=3)
@@ -44,10 +48,10 @@ if uploaded_file is not None:
             segmented_img, caption=f'Segmented Image with {k} Colors',
             use_column_width=True
         )
-
-    slice = np.random.choice(pixels.shape[0], 10000, replace=False)
-    sample_pixels = pixels[slice]
-    sample_labels = labels[slice]
+    if st.session_state.pixels_choice is None:
+        st.session_state.pixels_choice = np.random.choice(pixels.shape[0], 10000, replace=False)
+    sample_pixels = pixels[st.session_state.pixels_choice]
+    sample_labels = labels[st.session_state.pixels_choice]
     cluster_rgb_values = cluster_centers[sample_labels]
 
     fig = go.Figure(
